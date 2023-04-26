@@ -26,7 +26,7 @@ type rings struct {
 
 
 var Rings = rings{
-	allRings 			make(map[uint64]Ring),        	//Known Rings
+	allRings: 			make(map[uint64]Ring),        	//Known Rings
 }
 
 
