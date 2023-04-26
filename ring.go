@@ -1,7 +1,6 @@
 package Ring
 import (
-	"crypto/ed25519"
-
+	"github.com/vidarsolutions/Node"
 )
 
 type Ring struct{
@@ -11,22 +10,14 @@ type Ring struct{
 }
 
 
-var(
-	Rings 			map[uint64]ring        	//Known Rings
-)
-
-func getRing(RingID uint64)(Ring)	{
-	return Rings[RingID]
-
+var Rings = rings{
+	allRings: 			make(map[uint64]Ring),        	//Known Rings
 }
+
+
 
 type rings struct {
 	allRings map[uint64]Ring
-}
-
-
-var Rings = rings{
-	allRings: 			make(map[uint64]Ring),        	//Known Rings
 }
 
 
