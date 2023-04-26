@@ -32,6 +32,6 @@ func (r *rings) GetRings() map[uint64]Ring {
 	return r.allRings
 }
 
-func (r *rings) AddNode(newRing Ring) {
+func (r *rings) AddRing(newRing Ring) {
 	r.allRings[newRing.RingId] = newRing
 }
