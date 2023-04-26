@@ -5,7 +5,7 @@ import (
 
 type Ring struct{
 	RingId				uint64
-	Nodes				[]Node
+	Nodes				[]Node.Node
 	LastRing			uint64
 }
 
