@@ -11,9 +11,9 @@ type Ring struct{
 }
 
 
-var{
+var(
 	Rings 			map[uint64]ring        	//Known Rings
-}
+)
 
 func getRing(RingID uint64)(Ring)	{
 	return Rings[RingID]
