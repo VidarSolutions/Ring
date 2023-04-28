@@ -15,8 +15,8 @@ import(
 type Bytes32 [32]byte
 type Bytes64 [64]byte
 
-var Rings = rings{
-	AllRings: 			make(map[uint64]Ring),        	//Known Rings
+var VidarRings = Rings{
+	AllRings: 			make(map[uint64]Ring),        	//Known VidarRings
 	RingMasters: 		make(map[uint64]Node.VidarNode),			//Map of Nodes allowed to generate new ring and node ids.
 	Update:				time.Now(),
 	NodeIDs:			0,
@@ -25,7 +25,7 @@ var Rings = rings{
 
 
 
-type rings struct {
+type Rings struct {
 	AllRings map[uint64]Ring
 	RingMasters map[uint64]Node.VidarNode
 	Update		time.Time
@@ -35,27 +35,27 @@ type rings struct {
 
 
 	
-func (r *rings) GetRing(ringId uint64) Ring	{
+func (r *Rings) GetRing(ringId uint64) Ring	{
 	return r.AllRings[ringId]
 
 }
 
 
-func (r *rings) GetRings() map[uint64]Ring {
+func (r *Rings) GetRings() map[uint64]Ring {
 	return r.AllRings
 }
 
-func (r *rings) AddRing(newRing Ring) {
+func (r *Rings) AddRing(newRing Ring) {
 	r.AllRings[newRing.RingId] = newRing
 }
 
 
-func (r *rings)getNewNodeId() uint64 {
+func (r *Rings)getNewNodeId() uint64 {
     r.NodeIDs += 1
 	
     return r.NodeIDs
 }
-func (r *rings)getRingPeers(node *Node.VidarNode) ([]uint64, Node.VidarNode) {
+func (r *Rings)GetRingPeers(node *Node.VidarNode) ([]uint64, Node.VidarNode) {
 		knownRings := r.GetRings()
 		const ringSize = 7
 		node.NodeID = r.getNewNodeId()
@@ -64,7 +64,7 @@ func (r *rings)getRingPeers(node *Node.VidarNode) ([]uint64, Node.VidarNode) {
 		node.RingId = uint64(ringNum)
 		nextRing := ringNum + 1
 
-		// Create a slice to store the rings that this node will learn about and backup
+		// Create a slice to store the Rings that this node will learn about and backup
 		var peersRing []uint64
 		
 
@@ -75,7 +75,7 @@ func (r *rings)getRingPeers(node *Node.VidarNode) ([]uint64, Node.VidarNode) {
 		} else {
 			peersRing = append(peersRing, knownRings[nextRing].RingId)
 			ringIndex := node.NodeID - 1
-			// Loop through the next 7 rings to assign peers to
+			// Loop through the next 7 Rings to assign peers to
 			for i := 0; i < ringSize; i++ {
 				// Calculate the index of the ring in the knownRings slice
 				ringIndex = ringIndex + 7
@@ -93,7 +93,7 @@ func (r *rings)getRingPeers(node *Node.VidarNode) ([]uint64, Node.VidarNode) {
 		return peersRing, *node
 }
 
-func (r *rings)newRing(node *Node.VidarNode, sig Bytes32, msg string) uint64 {
+func (r *Rings)NewRing(node *Node.VidarNode, sig Bytes32, msg string) uint64 {
 	_, found := r.RingMasters[node.NodeID]		//only ring masters may call this function
 	if found{
 		if r.isRingMaster(node, sig, msg){
@@ -108,7 +108,7 @@ func (r *rings)newRing(node *Node.VidarNode, sig Bytes32, msg string) uint64 {
 	}
     return r.LastRing
 }
-func (r *rings)isRingMaster(node *Node.VidarNode, sig Bytes32, msg string) bool{
+func (r *Rings)isRingMaster(node *Node.VidarNode, sig Bytes32, msg string) bool{
 	var nodeId = node.NodeID
 	var pubKey = node.PubKey
 	var validMsg = r.LastRing+nodeId
@@ -130,14 +130,14 @@ func (r *rings)isRingMaster(node *Node.VidarNode, sig Bytes32, msg string) bool{
 }
 
 
-func (r *rings) RingMasterUpdate(){
+func (r *Rings) RingMasterUpdate(){
 	for _, rm := range r.RingMasters {
-		//dial out over tor to sync rings with ringmasters
+		//dial out over tor to sync Rings with ringmasters
 		var t =Transfer.Dialer("127.0.0.1:9050")
 		// Encode the struct as JSON
 		jsonData, err := json.Marshal(r.AllRings)
 		if err != nil {
-			fmt.Println("Could not convert Rings to Json")
+			fmt.Println("Could not convert VidarRings to Json")
 		}else{			
 			 var resp *http.Response 
 	         x := 0
@@ -162,40 +162,40 @@ func (r *rings) RingMasterUpdate(){
 	
 	
 
-func (r *rings)saveRings(){
-// Encode the rings map as JSON
+func (r *Rings)SaveRings(){
+// Encode the Rings map as JSON
     ringsJSON, err := json.Marshal(r)
     if err != nil {
         panic(err)
     }
 
     // Write the JSON string to a file
-    err = ioutil.WriteFile("rings.json", ringsJSON, 0644)
+    err = ioutil.WriteFile("Rings.json", ringsJSON, 0644)
     if err != nil {
         panic(err)
     }
 
-    fmt.Println("Rings have been saved to rings.json")
+    fmt.Println("VidarRings have been saved to Rings.json")
 
     
 
 }
 
-func (r *rings)loadRings() map[uint64]Ring{
-// Read the rings from the file
-    fileBytes, err := ioutil.ReadFile("rings.json")
+func (r *Rings)LoadRings() map[uint64]Ring{
+// Read the Rings from the file
+    fileBytes, err := ioutil.ReadFile("Rings.json")
     if err != nil {
        return r.GetRings()
     }
 
-    // Decode the JSON string into a Rings struct
+    // Decode the JSON string into a VidarRings struct
     var savedRings = r.GetRings()
     err = json.Unmarshal(fileBytes, &savedRings)
     if err != nil {
         return r.GetRings()
     }
 	
-	fmt.Println("Rings loaded from file:")
+	fmt.Println("VidarRings loaded from file:")
 	
 	
 		fmt.Printf("%+v\n", savedRings)
