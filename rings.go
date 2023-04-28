@@ -106,7 +106,7 @@ func (r *rings)isRingMaster(node *Node.VidarNode, sig Bytes32, msg string) bool{
 	var nodeId = node.NodeID
 	var pubKey = node.PubKey
 	var validMsg = r.LastRing+nodeId
-	var rm = false  bool
+	var rm bool  = false 
 	m, err := strconv.ParseInt(msg, 10, 64)
 	if m==validMsg{
 		//Check if Node signature is valid
