@@ -8,6 +8,7 @@ import(
 	"strconv"
 	"time"
 	"github.com/vidarsolutions/Node"
+	"github.com/vidarsolutions/Transfer"
 )
 
 type Bytes32 [32]byte
@@ -129,10 +130,33 @@ func (r *rings)isRingMaster(node *Node.VidarNode, sig Bytes32, msg string) bool{
 
 
 func (r *rings) RingMasterUpdate(){
-	for k, rm := range r.RingMasters {
+	for _, rm := range r.RingMasters {
 		//dial out over tor to sync rings with ringmasters
-		
+		var t =Transfer.Dialer("127.0.0.1:9050")
+		// Encode the struct as JSON
+		jsonData, err := json.Marshal(r.AllRings)
+		if err != nil {
+			fmt.Println("Could not convert Rings to Json")
+		}else{			
+			 var resp *http.Response 
+	         x := 0
+		     for {
+				x++
+				if x > 10 {
+					break
+				}
+					resp = t.Request("Post", rm.Tor, jsonData)
+					if resp.StatusCode == http.StatusOK {
+						break
+					}else {
+						time.Sleep(1 * time.Second) // Wait for 1 second before trying again
+					}
+				}
+				
+			}
+		}
 	}
+	
 	r.Update = time.Now()
 }
 
@@ -163,10 +187,10 @@ func (r *rings)loadRings() map[uint64]Ring{
     }
 
     // Decode the JSON string into a Rings struct
-    var savedRings = Ring.Rings.GetRings()
+    var savedRings = r.GetRings()
     err = json.Unmarshal(fileBytes, &savedRings)
     if err != nil {
-        return GetRings()
+        return r.GetRings()
     }
 	
 	fmt.Println("Rings loaded from file:")
