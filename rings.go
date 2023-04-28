@@ -1,22 +1,26 @@
 package Ring
 
 import(
+	"bytes"
 	"time"
 	"github.com/vidarsolutions/Node"
 )
 
 
 var Rings = rings{
-	allRings: 			make(map[uint64]Ring),        	//Known Rings
-	ringMasters: 		make(map[uint64]Node),			//Map of Nodes allowed to generate new ring and node ids.
+	AllRings: 			make(map[uint64]Ring),        	//Known Rings
+	RingMasters: 		make(map[uint64]VidarNode),			//Map of Nodes allowed to generate new ring and node ids.
+	Update:				Time.Time,
+	NodeIds:			0,
 }
 
 
 
 type rings struct {
 	allRings map[uint64]Ring
-	ringMasters map[uint64]Node
+	ringMasters map[uint64]VidarNode
 	Update		time.Time
+	NodeIDs		uint64
 }
 
 
@@ -41,7 +45,7 @@ func (r *rings)getNewNodeId() uint64 {
 	
     return r.nodeIDs
 }
-func (r *rings)getRingPeers(node *Node) ([]uint64, Node) {
+func (r *rings)getRingPeers(node *VidarNode) ([]uint64, VidarNode) {
 		knownRings := Ring.Rings.GetRings()
 		const ringSize = 7
 		node.NodeID = r.getNewNodeId()
@@ -79,7 +83,7 @@ func (r *rings)getRingPeers(node *Node) ([]uint64, Node) {
 		return peersRing, *node
 }
 
-func (r *rings)newRing(node *node, sig bytes32, msg string) uint64 {
+func (r *rings)newRing(node *VidarNode, sig bytes32, msg string) uint64 {
 	rm, found := r.Rings.ringMaster[node.NodeID]		//only ring masters may call this function
 	if found{
 		if r.isRingMaster(node, sig, msg){
@@ -95,7 +99,7 @@ func (r *rings)newRing(node *node, sig bytes32, msg string) uint64 {
 	}
     return r.LastRing
 }
-func (r *rings)isRingMaster(node *Node, sig bytes32, msg string){
+func (r *rings)isRingMaster(node *VidarNode, sig bytes32, msg string){
 	nodeId = node.NodeID
 	pubKey = node.PubKey
 	validMsg = r.lastRing+nodeId
@@ -138,18 +142,18 @@ func (r *rings)saveRings(){
 
 }
 
-func (r *rings)loadRings() map[uint64]Ring.Ring{
+func (r *rings)loadRings() map[uint64]Ring{
 // Read the rings from the file
     fileBytes, err := ioutil.ReadFile("rings.json")
     if err != nil {
-       return Ring.Rings.GetRings()
+       return GetRings()
     }
 
     // Decode the JSON string into a Rings struct
     var savedRings = Ring.Rings.GetRings()
     err = json.Unmarshal(fileBytes, &savedRings)
     if err != nil {
-        return Ring.Rings.GetRings()
+        return GetRings()
     }
 	
 	fmt.Println("Rings loaded from file:")
