@@ -104,7 +104,7 @@ func (r *rings)isRingMaster(node *Node.VidarNode, sig Bytes32, msg string) bool{
 	nodeId = node.NodeID
 	pubKey = node.PubKey
 	validMsg = r.lastRing+nodeId
-	rm bool
+	var rm bool
 	rm := false 
 	m, err := strconv.ParseInt(msg, 10, 64)
 	if m==validMsg{
