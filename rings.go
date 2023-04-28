@@ -1,6 +1,7 @@
 package Ring
 
 import(
+	"strconv"
 	"time"
 	"github.com/vidarsolutions/Node"
 )
