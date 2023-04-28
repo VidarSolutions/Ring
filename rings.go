@@ -2,6 +2,7 @@ package Ring
 
 import(
 	"time"
+	"github.com/vidarsolutions/Node"
 )
 
 

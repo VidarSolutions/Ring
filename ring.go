@@ -10,28 +10,7 @@ type Ring struct{
 }
 
 
-var Rings = rings{
-	allRings: 			make(map[uint64]Ring),        	//Known Rings
-}
 
-
-
-type rings struct {
-	allRings map[uint64]Ring
-}
 
 
 	
-func (r *rings) GetRing(ringId uint64) Ring	{
-	return r.allRings[ringId]
-
-}
-
-
-func (r *rings) GetRings() map[uint64]Ring {
-	return r.allRings
-}
-
-func (r *rings) AddRing(newRing Ring) {
-	r.allRings[newRing.RingId] = newRing
-}
