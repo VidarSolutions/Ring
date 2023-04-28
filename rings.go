@@ -147,7 +147,7 @@ func (r *rings) RingMasterUpdate(){
 					//Add code to Report Down RingMaster
 					break
 				}
-					resp = t.Request("Post", rm.Tor, jsonData)
+					resp, _ = t.Request("Post", rm.Tor, jsonData)
 					if resp.StatusCode == http.StatusOK {
 						break
 					}else {
