@@ -92,7 +92,7 @@ func (r *rings)getRingPeers(node *Node.VidarNode) ([]uint64, Node.VidarNode) {
 }
 
 func (r *rings)newRing(node *Node.VidarNode, sig Bytes32, msg string) uint64 {
-	rm, found := r.RingMasters[node.NodeID]		//only ring masters may call this function
+	_, found := r.RingMasters[node.NodeID]		//only ring masters may call this function
 	if found{
 		if r.isRingMaster(node, sig, msg){
 			r.LastRing += 1
@@ -122,14 +122,14 @@ func (r *rings)isRingMaster(node *Node.VidarNode, sig Bytes32, msg string) bool{
 		}
 		//add code to verify signature
 		
-		rm = ed25519.Verify(pubKey,[]byte(msg) , sig)
+		rm = ed25519.Verify(pubKey,[]byte(msg) , []byte(sig))
 	}
 	return rm
 }
 
 
 func (r *rings) RingMasterUpdate(){
-	for k, rm := range r.RingMaster {
+	for k, rm := range r.RingMasters {
 		//dial out over tor to sync rings with ringmasters
 		
 	}
@@ -159,7 +159,7 @@ func (r *rings)loadRings() map[uint64]Ring{
 // Read the rings from the file
     fileBytes, err := ioutil.ReadFile("rings.json")
     if err != nil {
-       return GetRings()
+       return r.GetRings()
     }
 
     // Decode the JSON string into a Rings struct
@@ -171,8 +171,8 @@ func (r *rings)loadRings() map[uint64]Ring{
 	
 	fmt.Println("Rings loaded from file:")
 	
-	if(Logging){
+	
 		fmt.Printf("%+v\n", savedRings)
-	}
+	
 	return savedRings
 }
