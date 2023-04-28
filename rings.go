@@ -1,8 +1,8 @@
 package Ring
 
-import{
+import(
 	"time"
-}
+)
 
 
 var Rings = rings{
