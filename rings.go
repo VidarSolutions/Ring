@@ -11,8 +11,9 @@ type Bytes64 [64]byte
 var Rings = rings{
 	AllRings: 			make(map[uint64]Ring),        	//Known Rings
 	RingMasters: 		make(map[uint64]Node.VidarNode),			//Map of Nodes allowed to generate new ring and node ids.
-	Update:				time.now(),
+	Update:				time.Now(),
 	NodeIDs:			0,
+	LastRing			0,
 }
 
 
@@ -22,6 +23,7 @@ type rings struct {
 	RingMasters map[uint64]Node.VidarNode
 	Update		time.Time
 	NodeIDs		uint64
+	LastRing	uint64
 }
 
 
@@ -47,7 +49,7 @@ func (r *rings)getNewNodeId() uint64 {
     return r.NodeIDs
 }
 func (r *rings)getRingPeers(node *Node.VidarNode) ([]uint64, Node.VidarNode) {
-		knownRings := GetRings()
+		knownRings := r.GetRings()
 		const ringSize = 7
 		node.NodeID = r.getNewNodeId()
 		// Determine the ring number of the node based on its ID
@@ -89,10 +91,10 @@ func (r *rings)newRing(node *Node.VidarNode, sig Bytes32, msg string) uint64 {
 	if found{
 		if r.isRingMaster(node, sig, msg){
 			r.LastRing += 1
-			ring := Ring.Ring{}
+			ring := Ring{}
 			ring.RingId =r.LastRing
 			ring.LastRing =r.LastRing
-			nodes:=createFirstNodes()
+			nodes := []Node.VidarNode{node}
 			
 			ring.Nodes = nodes
 			r.AddRing(ring)
@@ -101,7 +103,7 @@ func (r *rings)newRing(node *Node.VidarNode, sig Bytes32, msg string) uint64 {
     return r.LastRing
 }
 func (r *rings)isRingMaster(node *Node.VidarNode, sig Bytes32, msg string) bool{
-	nodeId = node.NodeID
+	var nodeId = node.NodeID
 	pubKey = node.PubKey
 	validMsg = r.lastRing+nodeId
 	var rm bool
