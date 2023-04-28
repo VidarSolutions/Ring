@@ -81,7 +81,7 @@ func (r *rings)getRingPeers(node *Node) ([]uint64, Node) {
 func (r *rings)newRing(node *node, sig bytes32, msg string) uint64 {
 	rm, found := r.Rings.ringMaster[node.NodeID]		//only ring masters may call this function
 	if found{
-		if (r.isRingMaster(node *node, sig bytes32, msg){
+		if (r.isRingMaster(node, sig, msg){
 			r.LastRing += 1
 			ring := Ring.Ring{}
 			ring.RingId =r.LastRing
