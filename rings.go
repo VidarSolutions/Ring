@@ -5,6 +5,7 @@ import(
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"strconv"
 	"time"
 	"github.com/vidarsolutions/Node"
@@ -123,7 +124,7 @@ func (r *rings)isRingMaster(node *Node.VidarNode, sig Bytes32, msg string) bool{
 		}
 		//add code to verify signature
 		
-		rm = ed25519.Verify(pubKey,[]byte(msg) , []byte(sig))
+		rm = ed25519.Verify(pubKey,[]byte(msg) , []byte(sig[:]))
 	}
 	return rm
 }
