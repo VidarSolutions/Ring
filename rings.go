@@ -11,7 +11,7 @@ type Bytes64 [64]byte
 var Rings = rings{
 	AllRings: 			make(map[uint64]Ring),        	//Known Rings
 	RingMasters: 		make(map[uint64]Node.VidarNode),			//Map of Nodes allowed to generate new ring and node ids.
-	Update:				time.Time,
+	Update:				time.now(),
 	NodeIDs:			0,
 }
 
@@ -27,27 +27,27 @@ type rings struct {
 
 	
 func (r *rings) GetRing(ringId uint64) Ring	{
-	return r.allRings[ringId]
+	return r.AllRings[ringId]
 
 }
 
 
 func (r *rings) GetRings() map[uint64]Ring {
-	return r.allRings
+	return r.AllRings
 }
 
 func (r *rings) AddRing(newRing Ring) {
-	r.allRings[newRing.RingId] = newRing
+	r.AllRings[newRing.RingId] = newRing
 }
 
 
 func (r *rings)getNewNodeId() uint64 {
-    r.nodeIDs += 1
+    r.NodeIDs += 1
 	
-    return r.nodeIDs
+    return r.NodeIDs
 }
 func (r *rings)getRingPeers(node *Node.VidarNode) ([]uint64, Node.VidarNode) {
-		knownRings := Ring.Rings.GetRings()
+		knownRings := GetRings()
 		const ringSize = 7
 		node.NodeID = r.getNewNodeId()
 		// Determine the ring number of the node based on its ID
@@ -85,7 +85,7 @@ func (r *rings)getRingPeers(node *Node.VidarNode) ([]uint64, Node.VidarNode) {
 }
 
 func (r *rings)newRing(node *Node.VidarNode, sig Bytes32, msg string) uint64 {
-	rm, found := r.Rings.ringMaster[node.NodeID]		//only ring masters may call this function
+	rm, found := r.ringMaster[node.NodeID]		//only ring masters may call this function
 	if found{
 		if r.isRingMaster(node, sig, msg){
 			r.LastRing += 1
@@ -100,10 +100,12 @@ func (r *rings)newRing(node *Node.VidarNode, sig Bytes32, msg string) uint64 {
 	}
     return r.LastRing
 }
-func (r *rings)isRingMaster(node *Node.VidarNode, sig bytes32, msg string){
+func (r *rings)isRingMaster(node *Node.VidarNode, sig Bytes32, msg string) bool{
 	nodeId = node.NodeID
 	pubKey = node.PubKey
 	validMsg = r.lastRing+nodeId
+	rm bool
+	rm := false 
 	m, err := strconv.ParseInt(msg, 10, 64)
 	if m==validMsg{
 		//Check if Node signature is valid
@@ -113,7 +115,10 @@ func (r *rings)isRingMaster(node *Node.VidarNode, sig bytes32, msg string){
 			//Run RingMasterUpdate
 			r.RingMasterUpdate()
 		}
+		//add code to verify signature
+		rm = true
 	}
+	return rm
 }
 
 func (r *rings) RingMasterUpdate(){
