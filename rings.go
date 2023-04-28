@@ -1,6 +1,10 @@
 package Ring
 
 import(
+	"crypto/ed25519"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"strconv"
 	"time"
 	"github.com/vidarsolutions/Node"
@@ -88,13 +92,13 @@ func (r *rings)getRingPeers(node *Node.VidarNode) ([]uint64, Node.VidarNode) {
 }
 
 func (r *rings)newRing(node *Node.VidarNode, sig Bytes32, msg string) uint64 {
-	rm, found := r.RingMaster[node.NodeID]		//only ring masters may call this function
+	rm, found := r.RingMasters[node.NodeID]		//only ring masters may call this function
 	if found{
 		if r.isRingMaster(node, sig, msg){
 			r.LastRing += 1
 			ring := Ring{}
 			ring.RingId =r.LastRing
-			nodes := []Node.VidarNode{&node}
+			nodes := []Node.VidarNode{*node}
 			
 			ring.Nodes = nodes
 			r.AddRing(ring)
@@ -107,23 +111,25 @@ func (r *rings)isRingMaster(node *Node.VidarNode, sig Bytes32, msg string) bool{
 	var pubKey = node.PubKey
 	var validMsg = r.LastRing+nodeId
 	var rm bool  = false 
-	m, err := strconv.ParseInt(msg, 10, 64)
+	m, _ := strconv.ParseUint(msg, 10, 64)
 	if m==validMsg{
 		//Check if Node signature is valid
 		today := time.Now()
 		tooLong := today.Add(-15 * time.Minute)
-		if r.Update > tooLong{
+		if r.Update.Before(tooLong){
 			//Run RingMasterUpdate
 			r.RingMasterUpdate()
 		}
 		//add code to verify signature
-		rm = true
+		
+		rm = ed25519.Verify(pubKey,[]byte(msg) , sig)
 	}
 	return rm
 }
 
+
 func (r *rings) RingMasterUpdate(){
-	for k, rm := range r.Rings.ringMaster {
+	for k, rm := range r.RingMaster {
 		//dial out over tor to sync rings with ringmasters
 		
 	}
