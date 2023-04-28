@@ -73,7 +73,7 @@ func (r *rings)getRingPeers(node *Node.VidarNode) ([]uint64, Node.VidarNode) {
 				// Calculate the index of the ring in the knownRings slice
 				ringIndex = ringIndex + 7
 				// Add the ring ID to the peersRing slice
-				if ringIndex+1 < len(knownRings) {
+				if ringIndex+1 < uint64(len(knownRings)) {
 					peersRing = append(peersRing, knownRings[ringIndex].RingId)
 				} else {
 					ringIndex = 0
@@ -87,14 +87,13 @@ func (r *rings)getRingPeers(node *Node.VidarNode) ([]uint64, Node.VidarNode) {
 }
 
 func (r *rings)newRing(node *Node.VidarNode, sig Bytes32, msg string) uint64 {
-	rm, found := r.ringMaster[node.NodeID]		//only ring masters may call this function
+	rm, found := r.RingMaster[node.NodeID]		//only ring masters may call this function
 	if found{
 		if r.isRingMaster(node, sig, msg){
 			r.LastRing += 1
 			ring := Ring{}
 			ring.RingId =r.LastRing
-			ring.LastRing =r.LastRing
-			nodes := []Node.VidarNode{node}
+			nodes := []Node.VidarNode{&node}
 			
 			ring.Nodes = nodes
 			r.AddRing(ring)
@@ -104,15 +103,14 @@ func (r *rings)newRing(node *Node.VidarNode, sig Bytes32, msg string) uint64 {
 }
 func (r *rings)isRingMaster(node *Node.VidarNode, sig Bytes32, msg string) bool{
 	var nodeId = node.NodeID
-	pubKey = node.PubKey
-	validMsg = r.lastRing+nodeId
-	var rm bool
-	rm := false 
+	var pubKey = node.PubKey
+	var validMsg = r.LastRing+nodeId
+	var rm = false  bool
 	m, err := strconv.ParseInt(msg, 10, 64)
 	if m==validMsg{
 		//Check if Node signature is valid
 		today := time.Now()
-		tooLong = today.Add(-15 * time.Minute)
+		tooLong := today.Add(-15 * time.Minute)
 		if r.Update > tooLong{
 			//Run RingMasterUpdate
 			r.RingMasterUpdate()
