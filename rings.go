@@ -13,7 +13,7 @@ var Rings = rings{
 	RingMasters: 		make(map[uint64]Node.VidarNode),			//Map of Nodes allowed to generate new ring and node ids.
 	Update:				time.Now(),
 	NodeIDs:			0,
-	LastRing			0,
+	LastRing:			0,
 }
 
 
