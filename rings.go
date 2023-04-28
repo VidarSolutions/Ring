@@ -1,24 +1,25 @@
 package Ring
 
 import(
-	"bytes"
 	"time"
 	"github.com/vidarsolutions/Node"
 )
 
+type Bytes32 [32]byte
+type Bytes64 [64]byte
 
 var Rings = rings{
 	AllRings: 			make(map[uint64]Ring),        	//Known Rings
-	RingMasters: 		make(map[uint64]VidarNode),			//Map of Nodes allowed to generate new ring and node ids.
-	Update:				Time.Time,
-	NodeIds:			0,
+	RingMasters: 		make(map[uint64]Node.VidarNode),			//Map of Nodes allowed to generate new ring and node ids.
+	Update:				time.Time,
+	NodeIDs:			0,
 }
 
 
 
 type rings struct {
-	allRings map[uint64]Ring
-	ringMasters map[uint64]VidarNode
+	AllRings map[uint64]Ring
+	RingMasters map[uint64]Node.VidarNode
 	Update		time.Time
 	NodeIDs		uint64
 }
@@ -45,7 +46,7 @@ func (r *rings)getNewNodeId() uint64 {
 	
     return r.nodeIDs
 }
-func (r *rings)getRingPeers(node *VidarNode) ([]uint64, VidarNode) {
+func (r *rings)getRingPeers(node *Node.VidarNode) ([]uint64, Node.VidarNode) {
 		knownRings := Ring.Rings.GetRings()
 		const ringSize = 7
 		node.NodeID = r.getNewNodeId()
@@ -83,7 +84,7 @@ func (r *rings)getRingPeers(node *VidarNode) ([]uint64, VidarNode) {
 		return peersRing, *node
 }
 
-func (r *rings)newRing(node *VidarNode, sig bytes32, msg string) uint64 {
+func (r *rings)newRing(node *Node.VidarNode, sig Bytes32, msg string) uint64 {
 	rm, found := r.Rings.ringMaster[node.NodeID]		//only ring masters may call this function
 	if found{
 		if r.isRingMaster(node, sig, msg){
@@ -99,7 +100,7 @@ func (r *rings)newRing(node *VidarNode, sig bytes32, msg string) uint64 {
 	}
     return r.LastRing
 }
-func (r *rings)isRingMaster(node *VidarNode, sig bytes32, msg string){
+func (r *rings)isRingMaster(node *Node.VidarNode, sig bytes32, msg string){
 	nodeId = node.NodeID
 	pubKey = node.PubKey
 	validMsg = r.lastRing+nodeId
