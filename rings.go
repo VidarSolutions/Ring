@@ -143,6 +143,7 @@ func (r *rings) RingMasterUpdate(){
 		     for {
 				x++
 				if x > 10 {
+					//Add code to Report Down RingMaster
 					break
 				}
 					resp = t.Request("Post", rm.Tor, jsonData)
@@ -155,10 +156,10 @@ func (r *rings) RingMasterUpdate(){
 				
 			}
 		}
+		r.Update = time.Now()
 	}
 	
-	r.Update = time.Now()
-}
+	
 
 func (r *rings)saveRings(){
 // Encode the rings map as JSON
